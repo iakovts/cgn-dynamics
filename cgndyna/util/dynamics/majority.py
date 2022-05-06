@@ -10,7 +10,7 @@ class MajorityRule(Dynamics):
         self.init_param = self.cfg.dyn.init_param
 
     def initial_state(self):
-        self.get_neighbors_state()
+        self.get_neighbors()
         rng = np.random.default_rng()
         x = rng.choice([0, 1], p=self.init_param, size=self.num_nodes)
         return x
