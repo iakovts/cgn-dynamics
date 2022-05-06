@@ -46,6 +46,8 @@ class Experiment:
 def test_only():
     c = Config()
     c.nw = NetworkCfg("gnp", 0.004)
-    c.exp = ExperimentCfg(lag=5,num_networks=10)
+    c.exp = ExperimentCfg(lag=5,num_networks=5, num_samples=10)
     c.dyn = DynamicsCfg("major", [0.4, 0.6])
-    return Experiment(c)
+    e = Experiment(c)
+    e.generate_data()
+    return e

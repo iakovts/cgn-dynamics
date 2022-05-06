@@ -28,7 +28,10 @@ class Dynamics(ABC):
 
     def get_neighbors(self) -> None:
         """Sets the value of self.neighbors to a dict of
-        node: np.array(node's neighbors) pairs"""
+        node: np.array(node's neighbors) pairs. If a node doesn't have
+        any neighbors, it is assigned as a neighbor to itself instead
+        """
         self.neighbors = {
-            node: np.array(self.nw[node]) for node in range(len(self.nw))
+            node: np.array(self.nw[node]) if self.nw[node] else np.array([node])
+            for node in range(len(self.nw))
         }
