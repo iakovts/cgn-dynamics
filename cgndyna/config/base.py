@@ -2,7 +2,7 @@ import networkx as nx
 
 from dataclasses import dataclass, field, make_dataclass
 
-from typing import Union
+from typing import Union, List
 
 
 
@@ -19,12 +19,20 @@ class NetworkCfg:
     #     if self.is_modular:
 
 @dataclass
+class DynamicsCfg:
+    name: str
+    init_param: List[float]
+
+@dataclass
 class ExperimentCfg:
     num_samples: int = field(default=100)
     num_networks: int = field(default=1)
+    lag: int = field(default=1)
+    lagstep: int = field(default=1)
 
 
 @dataclass
 class Config:
     nw: NetworkCfg = field(init=False)
     exp: ExperimentCfg = field(init=False)
+    dyn: DynamicsCfg = field(init=False)
