@@ -1,34 +1,41 @@
-import numpy as np
+from __future__ import annotations
 
-from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
+import numpy as np
+from typing import Generator, TYPE_CHECKING, Any
+
 from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
+from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 
 
 class Experiment:
-    def __init__(self, config):
-        self.cfg = config
-        self.nw_gen = None
-        self.networks = None
-        self.dynamics = None
-        self.data = []
+    def __init__(self, config: Config) -> None:
+        self.cfg: Config = config
+        self.nw_gen: Generator
+        self.networks: list[SimpleNetwork]
+        self.dynamics: MajorityRule
+        self.data: list[np.ndarray] = []
 
-    def setup(self):
+    def setup(self) -> None:
         """Initializes experiment's parameters"""
         self.set_networks()
 
-    def set_networks(self):
+    def set_networks(self) -> None:
         """Generates networks based on config, and populates the
         instance's `networks` attribute
         """
         net_gen = SimpleNetwork(self.cfg).network_generator()
-        self.networks = [next(net_gen) for nw in range(self.cfg.exp.num_networks)]
+        self.networks = [*net_gen]
 
-    def set_dynamics(self, nw):
+    def set_dynamics(self, nw: SimpleNetwork) -> None:
         """Sets the dynamics attribute for the experiment."""
         self.dynamics = MajorityRule(self.cfg, nw)
 
-    def generate_data(self):
+    def generate_data(self) -> None:
+        """Populates the `self.data` attr with datasets (timeseries) of 
+        the dynamics ran on each network. Datasets have shape
+        (samples, nodes, lagsteps).
+        """
         self.setup()
         n_samples = self.cfg.exp.num_samples
         for nw in range(self.cfg.exp.num_networks):
@@ -51,3 +58,5 @@ def test_only():
     e = Experiment(c)
     e.generate_data()
     return e
+
+e = test_only()

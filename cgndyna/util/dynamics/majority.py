@@ -1,21 +1,23 @@
+from __future__ import annotations
+
 import numpy as np
 
 from cgndyna.util.dynamics.base import Dynamics
 
 
 class MajorityRule(Dynamics):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.num_nodes = self.cfg.nw.num_nodes
-        self.init_param = self.cfg.dyn.init_param
+        self.num_nodes: int = self.cfg.nw.num_nodes
+        self.init_param: list[float] = self.cfg.dyn.init_param
         self.get_neighbors()
 
-    def initial_state(self):
+    def initial_state(self) -> np.ndarray:
         rng = np.random.default_rng()
         x = rng.choice([0, 1], p=self.init_param, size=self.num_nodes)
         return x
 
-    def step(self, x):
+    def step(self, x) -> np.ndarray:
         y = np.copy(x)
         for node in range(self.num_nodes):
             major = np.sum(x[self.neighbors[node]])

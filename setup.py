@@ -10,7 +10,7 @@ setup(
     author="Iakovos Tsouros",
     # packages=find_packages(include=["src*", "util*"]),
     packages=find_packages(),
-    python_requires=">3.6.*",
+    python_requires=">3.10.*",
     install_requires=reqs,
     entry_points={
         "console_scripts": [

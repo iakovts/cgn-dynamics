@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -12,18 +14,18 @@ if TYPE_CHECKING:
 
 
 class Dynamics(ABC):
-    def __init__(self, config, network):
+    def __init__(self, config: Config, network: Graph) -> None:
         self.cfg = config
         self.nw = network
-        self.neighbors = None
+        self.neighbors: dict[int, np.ndarray]
 
     @abstractmethod
-    def initial_state(self) -> npt.NDArray:
+    def initial_state(self) -> np.ndarray:
         """Defines the initial state of the dynamics on the network."""
         ...
 
     @abstractmethod
-    def step(self, x: npt.NDArray) -> npt.NDArray:
+    def step(self, x: np.ndarray) -> np.ndarray:
         """Progress to the next "step" of the dynamics."""
 
     def get_neighbors(self) -> None:
