@@ -7,6 +7,7 @@ from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
 from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 from cgndyna.dataset.dataset import Dataset
+from cgndyna.nn.data_transformer import DataTransformer
 
 
 class Experiment:
@@ -23,7 +24,7 @@ class Experiment:
 
     def set_networks(self) -> None:
         """Generates networks based on config, and populates the
-        instance's `networks` attribute
+        instance's `networks` attribute.
         """
         net_gen = SimpleNetwork(self.cfg).network_generator()
         self.networks = [*net_gen]
@@ -49,6 +50,10 @@ class Experiment:
                         dataset.data[sample, :, lagstep] = self.dynamics.step(x)
             self.data.append(dataset)
 
+    def transform_data(self):
+        transformer = DataTransformer(self.cfg, self.data)
+        transformer
+        
 
 def test_only():
     c = Config()

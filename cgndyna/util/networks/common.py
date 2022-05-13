@@ -26,7 +26,7 @@ class SimpleNetwork(Network):
         as well as the rest of the parameters and chooses the right nx
         function.
         """
-        for nw in range(self.cfg.exp.num_networks):
+        for _ in range(self.cfg.exp.num_networks):
             graph = network_funcs[self.cfg.nw.name](
                 self.cfg.nw.num_nodes, self.cfg.nw.nw_param, self.cfg.nw.seed
             )

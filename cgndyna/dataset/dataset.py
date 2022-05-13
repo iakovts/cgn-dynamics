@@ -4,7 +4,7 @@ import numpy as np
 
 from dataclasses import dataclass, field
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from cgndyna.util.networks.base import Network
