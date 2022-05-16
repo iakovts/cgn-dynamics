@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Generator, TYPE_CHECKING, Any
+from typing import Generator, TYPE_CHECKING, Any, Optional
 
 from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
 from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 from cgndyna.dataset.dataset import Dataset
-from cgndyna.nn.data_transformer import DataTransformer
+from cgndyna.dataset.data_transformer import DatasetLoader
+
+if TYPE_CHECKING:
+    import torch_geometric_temporal as tg
 
 
 class Experiment:
@@ -16,7 +19,8 @@ class Experiment:
         self.nw_gen: Generator
         self.networks: list[SimpleNetwork]
         self.dynamics: MajorityRule
-        self.data: list[Dataset] = []
+        self.dataset: list[Dataset] = []
+        self.signals: Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
 
     def setup(self) -> None:
         """Initializes experiment's parameters"""
@@ -34,8 +38,8 @@ class Experiment:
         self.dynamics = MajorityRule(self.cfg, nw)
 
     def generate_data(self) -> None:
-        """Populates the `self.data` attr with `Dataset` objects
-        the dynamics ran on each network. Datasets have shape
+        """Populates the `self.dataset` attr with `Dataset` objects
+        containing the dynamics ran on each network. Datasets have shape
         (samples, nodes, lagsteps) and also contain network info.
         """
         self.setup()
@@ -48,12 +52,14 @@ class Experiment:
                 for lagstep in range(1, self.cfg.exp.lag):
                     if lagstep % self.cfg.exp.lagstep == 0:
                         dataset.data[sample, :, lagstep] = self.dynamics.step(x)
-            self.data.append(dataset)
+            self.dataset.append(dataset)
 
-    def transform_data(self):
-        transformer = DataTransformer(self.cfg, self.data)
-        transformer
-        
+    def transform_data(self) -> None:
+        self.signals = dict()
+        for nw_idx in range(self.cfg.exp.num_networks):
+            self.signals[nw_idx] = DatasetLoader(self.dataset, nw_idx).get_dataset()
+
+
 
 def test_only():
     c = Config()
