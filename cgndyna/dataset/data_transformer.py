@@ -1,27 +1,29 @@
 from __future__ import annotations
-import pdb
+
 import torch
 
-import torch_geometric_temporal as tg
 import networkx as nx
+import numpy as np
+import torch_geometric_temporal as tg
 
 from torch_geometric.utils.convert import from_networkx
 from torch_geometric.utils import dense_to_sparse
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    import numpy as np
     from cgndyna.dataset.dataset import Dataset
 
 
 class DatasetLoader:
     def __init__(self, dataset: list[Dataset], data_idx: int) -> None:
         self.nw: nx.Graph = dataset[data_idx].nw
-        self.data: np.ndarray = dataset[data_idx].data  # array shaped (n_sample, n_nodes, lag)
+        self.data: np.ndarray = dataset[
+            data_idx
+        ].data  # array shaped (n_sample, n_nodes, lag)
 
     def _get_edges_and_weights(self) -> tuple[np.ndarray, np.ndarray]:
         """Returns a tuple containing numpy arrays of the `edge_indeces` and
-       `edge_weights` in a format compatible with StaticGraphTemporalSignal.
+        `edge_weights` in a format compatible with StaticGraphTemporalSignal.
         """
         G = self.nw
         adj_np = nx.to_numpy_matrix(G)
@@ -35,12 +37,13 @@ class DatasetLoader:
         signals = []
         for sample in range(samples):
             edge_indeces, edge_weights = self._get_edges_and_weights()
+            # Expand dims here to account for node features.
             features = [
-                self.data[sample, :, i : i + lags]
+                np.expand_dims(self.data[sample, :, i : i + lags], axis=1)
                 for i in range(self.data.shape[2] - lags)
             ]
             targets = [
-                self.data[sample, :, i + lags]
+                np.expand_dims(self.data[sample, :, i + lags], axis=1)
                 for i in range(self.data.shape[2] - lags)
             ]
             signals.append(

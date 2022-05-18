@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Generator, TYPE_CHECKING, Any, Optional
+from typing import Generator, TYPE_CHECKING, Any, Optional, NewType
 
 from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
 from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 from cgndyna.dataset.dataset import Dataset
 from cgndyna.dataset.data_transformer import DatasetLoader
-from cgndyna.nn.models import train
+from cgndyna.nn.models import TestModel
 
 if TYPE_CHECKING:
     import torch_geometric_temporal as tg
+    Signals = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
 
 
 class Experiment:
@@ -21,7 +22,7 @@ class Experiment:
         self.networks: list[SimpleNetwork]
         self.dynamics: MajorityRule
         self.dataset: list[Dataset] = []
-        self.signals: Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
+        self.signals: Signals
 
     def setup(self) -> None:
         """Initializes experiment's parameters"""
@@ -70,7 +71,12 @@ def test_only():
     e = Experiment(c)
     e.generate_data()
     e.transform_data()
-    return e
+    tm = TestModel(e.signals)
+    tm.setup()
+    tm.train()
+    labels, preds = tm.evaluate()
+    return e, labels, preds
 
 
 e = test_only()
+# train(e.signals)
