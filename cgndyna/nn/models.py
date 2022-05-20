@@ -48,7 +48,7 @@ class TestModel:
 
     def setup(self):
         self.split_data()
-        self.model = TemporalGNN(node_features=1, periods=2).to(self.device)
+        self.model = TemporalGNN(node_features=1, periods=1).to(self.device)
 
     def split_data(self):
         merged = list(chain(*self.signals.values()))
