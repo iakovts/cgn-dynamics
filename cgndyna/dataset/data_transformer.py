@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from cgndyna.dataset.dataset import Dataset
 
 
-class DatasetLoader:
+class SignalTransform:
     def __init__(self, dataset: list[Dataset], data_idx: int) -> None:
         self.nw: nx.Graph = dataset[data_idx].nw
         self.data: np.ndarray = dataset[
@@ -32,7 +32,8 @@ class DatasetLoader:
         edge_weights = edge_weights.numpy()
         return edge_indeces, edge_weights
 
-    def get_dataset(self, lags: int = 2) -> list[tg.StaticGraphTemporalSignal]:
+    def get_signals(self, lags: int = 2) -> list[tg.StaticGraphTemporalSignal]:
+        """Creates TGT compatible signals based on node and edge features."""
         samples = self.data.shape[0]
         signals = []
         for sample in range(samples):
@@ -46,6 +47,8 @@ class DatasetLoader:
                 np.expand_dims(self.data[sample, :, i + lags], axis=1)
                 for i in range(self.data.shape[2] - lags)
             ]
+            # At this point, features/targets are lists of length `n_sample`
+            # with each containing a np.array of size (n_nodes, n_node_features, lag)
             signals.append(
                 tg.StaticGraphTemporalSignal(
                     edge_index=edge_indeces,

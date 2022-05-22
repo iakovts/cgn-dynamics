@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import torch
-import torch.nn.functional as F
 
 from itertools import chain
 from random import shuffle
+
+import torch
+import torch.nn.functional as F
+import numpy as np
 
 from torch_geometric_temporal.nn.recurrent import A3TGCN
 

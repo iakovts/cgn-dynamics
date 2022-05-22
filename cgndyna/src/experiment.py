@@ -7,12 +7,13 @@ from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
 from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 from cgndyna.dataset.dataset import Dataset
-from cgndyna.dataset.data_transformer import DatasetLoader
+from cgndyna.dataset.data_transformer import SignalTransform
 from cgndyna.nn.models import TestModel
 
 if TYPE_CHECKING:
     import torch_geometric_temporal as tg
     Signals = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
+    MSignals = Optional[list[tg.StaticGraphTemporalSignal]]
 
 
 class Experiment:
@@ -57,20 +58,20 @@ class Experiment:
                         dataset.data[sample, :, lagstep] = x = self.dynamics.step(x)
             self.dataset.append(dataset)
 
-    def transform_data(self) -> None:
+    def generate_signals(self) -> None:
         self.signals = dict()
         for nw_idx in range(self.cfg.exp.num_networks):
-            self.signals[nw_idx] = DatasetLoader(self.dataset, nw_idx).get_dataset()
+            self.signals[nw_idx] = SignalTransform(self.dataset, nw_idx).get_signals()
 
 
 def test_only():
     c = Config()
-    c.nw = NetworkCfg("gnp", 0.004)
-    c.exp = ExperimentCfg(lag=5, num_networks=5, num_samples=100)
+    c.nw = NetworkCfg("gnp", 0.004, 500)
+    c.exp = ExperimentCfg(lag=5, num_networks=1000, num_samples=1)
     c.dyn = DynamicsCfg("major", [0.4, 0.6])
     e = Experiment(c)
     e.generate_data()
-    e.transform_data()
+    e.generate_signals()
     tm = TestModel(e.signals)
     tm.setup()
     tm.train()
