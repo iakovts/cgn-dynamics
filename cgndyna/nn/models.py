@@ -14,10 +14,19 @@ from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import torch_geometric_temporal as tg
-
     Signals_D = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
     Signal = list[tg.StaticGraphTemporalSignal]
     Model = torch.nn.Module
+
+# lossF = torch.nn.CrossEntropyLoss()
+def cross_entropy_loss(y_pred, y_true):
+    # total_loss = torch.sum(-y_true * torch.log(y_pred) - (1 - y_true) * torch.log(1 - y_pred))
+    y_pred = torch.clamp(y_pred, 1e-15, 1 - 1e-15)
+
+    total_loss = (-y_true * torch.log(y_pred))
+    n_nodes = y_true.shape[0]
+    mean_loss = total_loss / n_nodes
+    return mean_loss.sum()
 
 
 class TemporalGNN(torch.nn.Module):
@@ -50,7 +59,7 @@ class TestModel:
 
     def setup(self):
         self.split_data()
-        self.model = TemporalGNN(node_features=1, periods=1).to(self.device)
+        self.model = TemporalGNN(node_features=1, periods=3).to(self.device)
 
     def split_data(self):
         merged = list(chain(*self.signals.values()))
@@ -68,6 +77,7 @@ class TestModel:
                 for snapshot in signal:
                     snapshot = snapshot.to(self.device)
                     y_hat = self.model(snapshot.x, snapshot.edge_index)
+                    # import pdb; pdb.set_trace()
                     loss = loss + torch.mean((y_hat - snapshot.y) ** 2)
                     step += 1
             loss = loss / (step + 1)

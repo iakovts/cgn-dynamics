@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     Signals = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
     MSignals = Optional[list[tg.StaticGraphTemporalSignal]]
 
-
 class Experiment:
     def __init__(self, config: Config) -> None:
         self.cfg: Config = config
@@ -61,7 +60,7 @@ class Experiment:
     def generate_signals(self) -> None:
         self.signals = dict()
         for nw_idx in range(self.cfg.exp.num_networks):
-            self.signals[nw_idx] = SignalTransform(self.dataset, nw_idx).get_signals()
+            self.signals[nw_idx] = SignalTransform(self.dataset, nw_idx).get_signals(lags=3)
 
 
 def test_only():
@@ -72,6 +71,7 @@ def test_only():
     e = Experiment(c)
     e.generate_data()
     e.generate_signals()
+    # return e
     tm = TestModel(e.signals)
     tm.setup()
     tm.train()
