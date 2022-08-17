@@ -14,7 +14,7 @@ setup(
     install_requires=reqs,
     entry_points={
         "console_scripts": [
-            "mic=micwave.src.main:run",
+            "cgn-run=cgndyna.src.experiment:test_only",
         ]
     },
     # extras_require=extra_reqs,
