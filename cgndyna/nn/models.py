@@ -8,12 +8,13 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
-from torch_geometric_temporal.nn.recurrent import A3TGCN
+from torch_geometric_temporal.nn.recurrent import A3TGCN, MPNNLSTM
 
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import torch_geometric_temporal as tg
+
     Signals_D = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
     Signal = list[tg.StaticGraphTemporalSignal]
     Model = torch.nn.Module
@@ -23,7 +24,7 @@ def cross_entropy_loss(y_pred, y_true):
     # total_loss = torch.sum(-y_true * torch.log(y_pred) - (1 - y_true) * torch.log(1 - y_pred))
     y_pred = torch.clamp(y_pred, 1e-15, 1 - 1e-15)
 
-    total_loss = (-y_true * torch.log(y_pred))
+    total_loss = -y_true * torch.log(y_pred)
     n_nodes = y_true.shape[0]
     mean_loss = total_loss / n_nodes
     return mean_loss.sum()
@@ -46,6 +47,26 @@ class TemporalGNN(torch.nn.Module):
         h = F.relu(h)
         h = self.linear(h)
         return h
+
+
+# class Temporal2GNN(torch.nn.Module):
+#     def __init__(
+#         self,
+#         node_features,
+#         num_nodes=500,
+#         hidden_size=2,
+#         window_size=3,
+#         dropout_rate=0.01,
+#     ):
+#         super(Temporal2GNN, self).__init__()
+#         self.tgnn = MPNNLSTM(
+#             in_channels=node_features,
+#             hidden_size=hidden_size,
+#             num_nodes=num_nodes,
+#             window=window_size,
+#             dropout=dropout_rate,
+#         )
+#         self.linear = torch.nn.Linear()
 
 
 class TestModel:

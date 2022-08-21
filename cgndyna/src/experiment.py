@@ -5,6 +5,7 @@ from typing import Generator, TYPE_CHECKING, Any, Optional, NewType
 
 from cgndyna.util.networks.common import SimpleNetwork
 from cgndyna.util.dynamics.majority import MajorityRule
+from cgndyna.util.dynamics.simple import SIS
 from cgndyna.config.base import Config, ExperimentCfg, NetworkCfg, DynamicsCfg
 from cgndyna.dataset.dataset import Dataset
 from cgndyna.dataset.data_transformer import SignalTransform
@@ -12,6 +13,7 @@ from cgndyna.nn.models import TestModel
 
 if TYPE_CHECKING:
     import torch_geometric_temporal as tg
+    from cgndyna.util.dynamics.base import Dynamics
     Signals = Optional[dict[int, list[tg.StaticGraphTemporalSignal]]]
     MSignals = Optional[list[tg.StaticGraphTemporalSignal]]
 
@@ -20,7 +22,7 @@ class Experiment:
         self.cfg: Config = config
         self.nw_gen: Generator
         self.networks: list[SimpleNetwork]
-        self.dynamics: MajorityRule
+        self.dynamics: Dynamics
         self.dataset: list[Dataset] = []
         self.signals: Signals
 
@@ -37,7 +39,8 @@ class Experiment:
 
     def set_dynamics(self, nw: SimpleNetwork) -> None:
         """Sets the dynamics attribute for the experiment."""
-        self.dynamics = MajorityRule(self.cfg, nw)
+        # self.dynamics = MajorityRule(self.cfg, nw)
+        self.dynamics = SIS(self.cfg, nw)
 
     def generate_data(self) -> None:
         """Populates the `self.dataset` attr with `Dataset` objects
@@ -65,19 +68,20 @@ class Experiment:
 
 def test_only():
     c = Config()
-    c.nw = NetworkCfg("gnp", 0.004, 500)
-    c.exp = ExperimentCfg(lag=5, num_networks=1000, num_samples=1)
-    c.dyn = DynamicsCfg("major", [0.4, 0.6])
+    c.nw = NetworkCfg("gnp", 0.008, 1000)
+    c.exp = ExperimentCfg(lag=10, num_networks=1, num_samples=100)
+    c.dyn = DynamicsCfg("major", [0.3, 0.7])
     e = Experiment(c)
     e.generate_data()
     e.generate_signals()
     # return e
-    tm = TestModel(e.signals)
-    tm.setup()
-    tm.train()
-    labels, preds = tm.evaluate()
-    return e, labels, preds
+    # tm = TestModel(e.signals)
+    # tm.setup()
+    # tm.train()
+    # labels, preds = tm.evaluate()
+    # return e, labels, preds
+    return e
 
 
-e = test_only()
+# e = test_only()
 # train(e.signals)
